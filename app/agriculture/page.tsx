@@ -43,7 +43,7 @@ const weatherData = [
   { metric: "UV Index", value: "6.2", status: "Moderate", icon: Sun },
 ];
 
-export default function AgriculturePage() {
+export default function Dashboard() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <motion.div

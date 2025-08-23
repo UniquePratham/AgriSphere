@@ -40,9 +40,9 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            Cultivating tomorrow's harvest with AI-powered predictions: Maximize
-            yields, minimize risks, and grow sustainably with data-driven
-            insights for the modern farmer.
+            Cultivating tomorrow&apos;s harvest with AI-powered predictions:
+            Maximize yields, minimize risks, and grow sustainably with
+            data-driven insights for the modern farmer.
           </motion.p>
 
           <motion.div
