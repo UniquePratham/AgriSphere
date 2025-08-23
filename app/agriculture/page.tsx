@@ -45,6 +45,18 @@ const cropData = [
   { crop: "Rice", yield: 89, health: 91, area: "1,543 acres", icon: Wheat },
 ];
 
+interface PredictRequest {
+  Crop: string;
+  Crop_Year: number;
+  Season: string;
+  State: string;
+  Area: number;
+  Production: number;
+  Annual_Rainfall: number;
+  Fertilizer: number;
+  Pesticide: number;
+}
+
 interface PredictionRequest {
   region: string;
   soil_type: string;
@@ -63,32 +75,46 @@ interface WeatherData {
   status: string;
   icon: React.ComponentType<{ className?: string }>;
 }
-interface PredictionData {
-  yield: string;
-}
 
 export default function Dashboard() {
   const [weatherData, setWeatherData] = useState<null | WeatherData[]>(null);
-  const [predictionData, setPredictionData] = useState<null | PredictionData>(
-    null
-  );
+  const [predictionData, setPredictionData] = useState<null | number>(null);
   const [formData, setFormData] = useState<null | PredictionRequest>(null);
+  const [monitorCrops, setMonitorCrops] = useState<any[]>([]);
   // Protect page: redirect to login if not authenticated
   if (typeof window !== "undefined" && !localStorage.getItem("accessToken")) {
     window.location.href = "/login";
     return null;
   }
 
-  const handlePredictRequest = async (
-    predictionRequestData: PredictionRequest
-  ) => {
-    const res = await fetch("/api/predict-yield", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(predictionRequestData),
-    });
-    const result = await res.json();
-    setPredictionData(result);
+  // Predict yields for multiple crops and update monitorCrops
+  const handlePredictRequest = async (baseRequest: PredictRequest) => {
+    const cropsToMonitor = ["Wheat", "Rice", "Maize", "Sugarcane", "Soyabean"];
+    const results: any[] = [];
+    for (const crop of cropsToMonitor) {
+      const req = { ...baseRequest, Crop: crop };
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_PREDICTION_MODEL_URL}/predict`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(req),
+          }
+        );
+        const result = await res.json();
+        results.push({
+          crop,
+          yield: result.Yield,
+          area: req.Area,
+          health: Math.floor(Math.random() * 20 + 80), // Simulated health
+        });
+      } catch (err) {
+        results.push({ crop, yield: null, area: req.Area, health: null });
+      }
+    }
+    setMonitorCrops(results);
+    setPredictionData(results[0]?.yield ?? null); // Show first crop's yield in prediction tab
   };
 
   const handleWeatherRequest = async (region: string) => {
@@ -106,9 +132,9 @@ export default function Dashboard() {
             metric: "Temperature",
             value: `${(weather.main.temp - 273.15).toFixed(2)}°C`,
             status:
-              weather.main.temp > 30
+              weather.main.temp - 273.15 > 30
                 ? "High"
-                : weather.main.temp < 15
+                : weather.main.temp - 273.15 < 15
                 ? "Low"
                 : "Optimal",
             icon: Thermometer,
@@ -146,8 +172,6 @@ export default function Dashboard() {
           },
         ]);
       }
-
-      console.log(weatherData);
     } catch (err) {
       console.log(err);
       setWeatherData(defaultWeatherData);
@@ -157,21 +181,20 @@ export default function Dashboard() {
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
-    const data = {
-      region: form.region.value,
-      soil_type: form.soil_type.value,
-      crop: form.crop.value,
-      rainfall_mm: form.rainfall_mm.value,
-      temperature_celsius: form.temperature_celsius.value,
-      fertilizer_used: form.fertilizer_used.value,
-      irrigation_used: form.irrigation_used.value,
-      weather_condition: form.weather_condition.value,
-      days_to_harvest: form.days_to_harvest.value,
+    const data: PredictRequest = {
+      Crop: form.Crop.value,
+      Crop_Year: Number(form.Crop_Year.value),
+      Season: form.Season.value,
+      State: form.State.value,
+      Area: Number(form.Area.value),
+      Production: Number(form.Production.value),
+      Annual_Rainfall: Number(form.Annual_Rainfall.value),
+      Fertilizer: Number(form.Fertilizer.value),
+      Pesticide: Number(form.Pesticide.value),
     };
-
-    setFormData(data);
+    setFormData(data as any);
     handlePredictRequest(data);
-    handleWeatherRequest(data.region);
+    handleWeatherRequest(data.State);
   };
 
   return (
@@ -206,74 +229,182 @@ export default function Dashboard() {
         <CardContent>
           <form
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            onSubmit={handleFormSubmit}>
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const data: PredictRequest = {
+                Crop: form.Crop.value,
+                Crop_Year: Number(form.Crop_Year.value),
+                Season: form.Season.value,
+                State: form.State.value,
+                Area: Number(form.Area.value),
+                Production: Number(form.Production.value),
+                Annual_Rainfall: Number(form.Annual_Rainfall.value),
+                Fertilizer: Number(form.Fertilizer.value),
+                Pesticide: Number(form.Pesticide.value),
+              };
+              setFormData(data as any);
+              await handlePredictRequest(data);
+              handleWeatherRequest(data.State);
+            }}>
+            {/* ...existing crop, year, season, state, area, production, rainfall, fertilizer, pesticide fields... */}
             <select
-              name="region_select"
+              name="Crop"
               required
               className="input input-bordered p-2 border border-gray-300 rounded-md">
-              <option value="">Select Region</option>
-              <option value="Delhi">Delhi</option>
-              <option value="Mumbai">Mumbai</option>
-              <option value="Bangalore">Bangalore</option>
-              <option value="Chennai">Chennai</option>
-              <option value="Hyderabad">Hyderabad</option>
-              <option value="Kolkata">Kolkata</option>
-              <option value="Ahmedabad">Ahmedabad</option>
-              <option value="Pune">Pune</option>
-              <option value="Jaipur">Jaipur</option>
-              <option value="Lucknow">Lucknow</option>
-              <option value="Other">Other</option>
+              <option value="">Select Crop</option>
+              <option value="Arecanut">Arecanut</option>
+              <option value="Arhar/Tur">Arhar/Tur</option>
+              <option value="Bajra">Bajra</option>
+              <option value="Banana">Banana</option>
+              <option value="Barley">Barley</option>
+              <option value="Black pepper">Black pepper</option>
+              <option value="Cardamom">Cardamom</option>
+              <option value="Cashewnut">Cashewnut</option>
+              <option value="Castor seed">Castor seed</option>
+              <option value="Coconut">Coconut</option>
+              <option value="Coriander">Coriander</option>
+              <option value="Cotton(lint)">Cotton(lint)</option>
+              <option value="Cowpea(Lobia)">Cowpea(Lobia)</option>
+              <option value="Dry chillies">Dry chillies</option>
+              <option value="Garlic">Garlic</option>
+              <option value="Ginger">Ginger</option>
+              <option value="Gram">Gram</option>
+              <option value="Groundnut">Groundnut</option>
+              <option value="Guar seed">Guar seed</option>
+              <option value="Horse-gram">Horse-gram</option>
+              <option value="Jowar">Jowar</option>
+              <option value="Jute">Jute</option>
+              <option value="Khesari">Khesari</option>
+              <option value="Linseed">Linseed</option>
+              <option value="Maize">Maize</option>
+              <option value="Masoor">Masoor</option>
+              <option value="Mesta">Mesta</option>
+              <option value="Moong(Green Gram)">Moong(Green Gram)</option>
+              <option value="Moth">Moth</option>
+              <option value="Niger seed">Niger seed</option>
+              <option value="Oilseeds total">Oilseeds total</option>
+              <option value="Onion">Onion</option>
+              <option value="Other  Rabi pulses">Other Rabi pulses</option>
+              <option value="Other Cereals">Other Cereals</option>
+              <option value="Other Kharif pulses">Other Kharif pulses</option>
+              <option value="Other Summer Pulses">Other Summer Pulses</option>
+              <option value="Peas & beans (Pulses)">
+                Peas & beans (Pulses)
+              </option>
+              <option value="Potato">Potato</option>
+              <option value="Ragi">Ragi</option>
+              <option value="Rapeseed &Mustard">Rapeseed &Mustard</option>
+              <option value="Rice">Rice</option>
+              <option value="Safflower">Safflower</option>
+              <option value="Sannhamp">Sannhamp</option>
+              <option value="Sesamum">Sesamum</option>
+              <option value="Small millets">Small millets</option>
+              <option value="Soyabean">Soyabean</option>
+              <option value="Sugarcane">Sugarcane</option>
+              <option value="Sunflower">Sunflower</option>
+              <option value="Sweet potato">Sweet potato</option>
+              <option value="Tapioca">Tapioca</option>
+              <option value="Tobacco">Tobacco</option>
+              <option value="Turmeric">Turmeric</option>
+              <option value="Urad">Urad</option>
+              <option value="Wheat">Wheat</option>
+              <option value="other oilseeds">other oilseeds</option>
             </select>
             <input
-              name="soil_type"
-              required
-              className="input input-bordered p-2 border border-gray-300 rounded-md"
-              placeholder="Soil Type"
-            />
-            <input
-              name="crop"
-              required
-              className="input input-bordered p-2 border border-gray-300 rounded-md"
-              placeholder="Crop"
-            />
-            <input
-              name="rainfall_mm"
+              name="Crop_Year"
               required
               type="number"
               className="input input-bordered p-2 border border-gray-300 rounded-md"
-              placeholder="Rainfall (mm)"
+              placeholder="Crop Year (e.g. 2020)"
             />
+            <select
+              name="Season"
+              required
+              className="input input-bordered p-2 border border-gray-300 rounded-md">
+              <option value="">Select Season</option>
+              <option value="Kharif">Kharif</option>
+              <option value="Rabi">Rabi</option>
+              <option value="Spring">Whole Year</option>
+              <option value="Summer">Summer</option>
+              <option value="Autumn">Winter</option>
+            </select>
+            <select
+              name="State"
+              required
+              className="input input-bordered p-2 border border-gray-300 rounded-md">
+              <option value="">Select State</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+              <option value="Assam">Assam</option>
+              <option value="Bihar">Bihar</option>
+              <option value="Chhattisgarh">Chhattisgarh</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Goa">Goa</option>
+              <option value="Gujarat">Gujarat</option>
+              <option value="Haryana">Haryana</option>
+              <option value="Himachal Pradesh">Himachal Pradesh</option>
+              <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+              <option value="Jharkhand">Jharkhand</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Madhya Pradesh">Madhya Pradesh</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Manipur">Manipur</option>
+              <option value="Meghalaya">Meghalaya</option>
+              <option value="Mizoram">Mizoram</option>
+              <option value="Nagaland">Nagaland</option>
+              <option value="Odisha">Odisha</option>
+              <option value="Puducherry">Puducherry</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Sikkim">Sikkim</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="Telangana">Telangana</option>
+              <option value="Tripura">Tripura</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+              <option value="Uttarakhand">Uttarakhand</option>
+              <option value="West Bengal">West Bengal</option>
+            </select>
             <input
-              name="temperature_celsius"
+              name="Area"
               required
               type="number"
               className="input input-bordered p-2 border border-gray-300 rounded-md"
-              placeholder="Temperature (°C)"
+              placeholder="Area (hectare)"
             />
             <input
-              name="fertilizer_used"
-              required
-              className="input input-bordered p-2 border border-gray-300 rounded-md"
-              placeholder="Fertilizer Used"
-            />
-            <input
-              name="irrigation_used"
-              required
-              className="input input-bordered p-2 border border-gray-300 rounded-md"
-              placeholder="Irrigation Used"
-            />
-            <input
-              name="weather_condition"
-              required
-              className="input input-bordered p-2 border border-gray-300 rounded-md"
-              placeholder="Weather Condition"
-            />
-            <input
-              name="days_to_harvest"
+              name="Production"
               required
               type="number"
               className="input input-bordered p-2 border border-gray-300 rounded-md"
-              placeholder="Days to Harvest"
+              placeholder="Production (kg)"
+            />
+            <input
+              name="Annual_Rainfall"
+              required
+              type="number"
+              min={0}
+              max={2000}
+              className="input input-bordered p-2 border border-gray-300 rounded-md"
+              placeholder="Annual Rainfall (mm)"
+            />
+            <input
+              name="Fertilizer"
+              required
+              type="number"
+              min={0}
+              max={1000}
+              className="input input-bordered p-2 border border-gray-300 rounded-md"
+              placeholder="Fertilizer (kg/ha)"
+            />
+            <input
+              name="Pesticide"
+              required
+              type="number"
+              min={0}
+              max={1000}
+              className="input input-bordered p-2 border border-gray-300 rounded-md"
+              placeholder="Pesticide (kg/ha)"
             />
             <div className="md:col-span-2 flex justify-end mt-2">
               <Button type="submit">Predict Yield</Button>
@@ -322,7 +453,7 @@ export default function Dashboard() {
       )}
 
       {/* Agricultural Dashboard */}
-      {predictionData && (
+      {monitorCrops.length > 0 && predictionData && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -344,7 +475,7 @@ export default function Dashboard() {
 
               <TabsContent value="crops" className="space-y-4">
                 <div className="space-y-4">
-                  {cropData.map((crop, index) => (
+                  {monitorCrops.map((crop, index) => (
                     <motion.div
                       key={crop.crop}
                       initial={{ opacity: 0, x: -20 }}
@@ -353,11 +484,11 @@ export default function Dashboard() {
                       className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center space-x-3">
-                          <crop.icon className="w-5 h-5 text-emerald-500" />
+                          <Wheat className="w-5 h-5 text-emerald-500" />
                           <div>
                             <h4 className="font-medium">{crop.crop}</h4>
                             <p className="text-sm text-muted-foreground">
-                              {crop.area}
+                              Area: {crop.area}
                             </p>
                           </div>
                         </div>
@@ -366,16 +497,20 @@ export default function Dashboard() {
                             Health Score
                           </div>
                           <div className="text-lg font-bold text-emerald-600">
-                            {crop.health}%
+                            {crop.health ? `${crop.health}%` : "-"}
                           </div>
                         </div>
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Predicted Yield</span>
-                          <span className="font-medium">{crop.yield}%</span>
+                          <span className="font-medium">
+                            {crop.yield !== null
+                              ? `${crop.yield.toFixed(2)} kg/ha`
+                              : "N/A"}
+                          </span>
                         </div>
-                        <Progress value={crop.yield} className="h-2" />
+                        <Progress value={crop.yield ?? 0} className="h-2" />
                       </div>
                     </motion.div>
                   ))}
@@ -394,7 +529,7 @@ export default function Dashboard() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Current Season Forecast</span>
                         <span className="font-medium text-emerald-600">
-                          {predictionData.yield}
+                          {predictionData.toFixed(2)} kg/ha
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
