@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 const tracks = [
-  { name: "AI Chat", icon: Brain, href: "/ai", color: "text-purple-500" },
+  { name: "AI Chat", icon: Brain, href: "/ai", color: "text-teal-600" },
   {
     name: "Agriculture",
     icon: Wheat,
@@ -28,6 +28,36 @@ const tracks = [
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  // Check authentication status on mount and listen for login/logout events
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsSignedIn(!!localStorage.getItem("accessToken"));
+      const handleAuthChange = () => {
+        setIsSignedIn(!!localStorage.getItem("accessToken"));
+      };
+      window.addEventListener("authChange", handleAuthChange);
+      return () => window.removeEventListener("authChange", handleAuthChange);
+    }
+  }, []);
+
+  // Sign out handler
+  const handleSignOut = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      await fetch("https://agriculture-backend-6ufw.onrender.com/user/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      window.dispatchEvent(new Event("authChange"));
+      setIsSignedIn(false);
+      window.location.href = "/login";
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -36,10 +66,10 @@ export function Header() {
           <motion.div
             whileHover={{ rotate: 180 }}
             transition={{ duration: 0.3 }}
-            className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+            className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-cyan-500 to-emerald-600 rounded-lg">
             <Trees className="w-5 h-5 text-white" />
           </motion.div>
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <span className="text-xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">
             AgriSphere
           </span>
         </Link>
@@ -58,11 +88,30 @@ export function Header() {
         </nav>
 
         <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" className="hidden md:inline-flex">
-            Sign In
-          </Button>
-          <Button size="sm" className="hidden md:inline-flex">
-            Get Started
+          {isSignedIn ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden md:inline-flex"
+              onClick={handleSignOut}>
+              Sign Out
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden md:inline-flex"
+              onClick={() => (window.location.href = "/login")}>
+              Sign In
+            </Button>
+          )}
+          <Button
+            size="sm"
+            className="hidden md:inline-flex bg-teal-600 hover:bg-teal-500"
+            onClick={() =>
+              (window.location.href = isSignedIn ? "/agriculture" : "/register")
+            }>
+            {isSignedIn ? "Dashboard" : "Get Started"}
           </Button>
 
           {/* Mobile Menu Button */}
@@ -99,11 +148,32 @@ export function Header() {
               </Link>
             ))}
             <div className="pt-3 border-t space-y-2">
-              <Button variant="outline" size="sm" className="w-full">
-                Sign In
-              </Button>
-              <Button size="sm" className="w-full">
-                Get Started
+              {isSignedIn ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={handleSignOut}>
+                  Sign Out
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => (window.location.href = "/login")}>
+                  Sign In
+                </Button>
+              )}
+              <Button
+                size="sm"
+                className="w-full bg-teal-600"
+                onClick={() =>
+                  (window.location.href = isSignedIn
+                    ? "/agriculture"
+                    : "/register")
+                }>
+                {isSignedIn ? "Dashboard" : "Get Started"}
               </Button>
             </div>
           </div>

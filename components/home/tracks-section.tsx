@@ -26,7 +26,7 @@ const features = [
   {
     name: "Crop Yield Prediction",
     icon: Wheat,
-    color: "from-yellow-500 to-green-500",
+    color: "from-gray-500 to-green-500",
     description:
       "AI-powered prediction of crop yields for smarter planning and resource allocation.",
     details: [
@@ -39,7 +39,7 @@ const features = [
   {
     name: "Weather Analysis",
     icon: Cloud,
-    color: "from-blue-500 to-cyan-500",
+    color: "from-green-500 to-cyan-500",
     description:
       "Real-time weather insights and forecasts for agricultural decision-making.",
     details: [
@@ -65,7 +65,7 @@ const features = [
   {
     name: "AI Chat for Farmers",
     icon: Brain,
-    color: "from-purple-500 to-pink-500",
+    color: "from-emerald-500 to-cyan-500",
     description:
       "Conversational AI assistant for farming advice, troubleshooting, and support.",
     details: [
@@ -164,7 +164,7 @@ export function TracksSection() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-center space-y-4">
-            <div className="w-12 h-12 mx-auto bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 mx-auto bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
               <Activity className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-semibold">Real-time Monitoring</h3>
@@ -194,7 +194,7 @@ export function TracksSection() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-center space-y-4">
-            <div className="w-12 h-12 mx-auto bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 mx-auto bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-lg flex items-center justify-center">
               <Shield className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-xl font-semibold">Enterprise Security</h3>

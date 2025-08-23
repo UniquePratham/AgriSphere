@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Send, Brain } from "lucide-react";
 
 export default function AIChatPage() {
+  // Protect page: redirect to login if not authenticated
+  useEffect(() => {
+    if (typeof window !== "undefined" && !localStorage.getItem("accessToken")) {
+      window.location.href = "/login";
+    }
+  }, []);
   const [messages, setMessages] = useState([
     {
       sender: "ai",

@@ -9,15 +9,15 @@ const stats = [
     label: "Predicted Wheat Yield",
     value: 87,
     max: 100,
-    color: "bg-yellow-600",
+    color: "bg-teal-200",
   },
-  { label: "Predicted Corn Yield", value: 94, max: 100, color: "bg-green-600" },
-  { label: "AI Accuracy", value: 92, max: 100, color: "bg-blue-600" },
+  { label: "Predicted Corn Yield", value: 94, max: 100, color: "bg-teal-200" },
+  { label: "AI Accuracy", value: 92, max: 100, color: "bg-teal-200" },
   {
     label: "Farmers Benefited",
     value: 1500,
     max: 2000,
-    color: "bg-emerald-600",
+    color: "bg-teal-200",
   },
 ];
 
@@ -52,7 +52,7 @@ export function StatsSection() {
                   </div>
                   <Progress
                     value={(stat.value / stat.max) * 100}
-                    className={`h-2 ${stat.color}`}
+                    className={`h-2 ${stat.color} accent-teal-600 text-teal-600`}
                   />
                   <div className="text-xs text-muted-foreground mt-2">
                     {Math.round((stat.value / stat.max) * 100)}% of target
