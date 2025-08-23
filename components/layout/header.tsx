@@ -19,11 +19,12 @@ import {
 const tracks = [
   { name: "AI Chat", icon: Brain, href: "/ai", color: "text-teal-600" },
   {
-    name: "Agriculture",
+    name: "Dashboard",
     icon: Wheat,
     href: "/agriculture",
     color: "text-emerald-500",
   },
+  { name: "Weather", icon: Cloud, href: "/weather", color: "text-green-600" },
 ];
 
 export function Header() {

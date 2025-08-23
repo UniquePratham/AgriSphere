@@ -86,7 +86,7 @@ export default function LoginPage() {
           </Button>
         </form>
         <div className="mt-6 text-sm text-center">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <a href="/register" className="text-teal-600 underline font-medium">
             Register
           </a>
