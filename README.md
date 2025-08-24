@@ -36,7 +36,7 @@
 
 ### Market
 
-<img src="public/agricopilot.png" alt="AI Chat Screenshot" />
+<img src="public/market.png" alt="AI Chat Screenshot" />
 
 ## Getting Started
 
@@ -60,24 +60,6 @@
    yarn dev
    ```
 5. **Open [http://localhost:3000](http://localhost:3000) in your browser.**
-
----
-
-## Screenshots
-
-### Dashboard
-
-<img src="public/screenshot-dashboard.png" width="600" alt="Dashboard Screenshot" />
-
-### Weather
-
-<img src="public/screenshot-weather.png" width="600" alt="Weather Screenshot" />
-
-### AI Chat
-
-<img src="public/screenshot-ai.png" width="600" alt="AI Chat Screenshot" />
-
----
 
 ## Tech Stack
 
