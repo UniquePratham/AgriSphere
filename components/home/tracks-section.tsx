@@ -92,7 +92,7 @@ const features = [
 
 export function TracksSection() {
   return (
-    <section className="py-24 bg-background">
+    <section id="features" className="py-24 bg-background">
       <div className="container px-4 mx-auto">
         <div className="text-center mb-16">
           <motion.h2

@@ -9,7 +9,7 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+      {/* <div className="absolute inset-0 bg-grid-pattern opacity-5" /> */}
 
       <div className="container mx-auto px-4 py-24 md:py-32">
         <div className="mx-auto max-w-4xl text-center">
@@ -50,16 +50,22 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" className="text-lg px-8 py-6 h-auto bg-teal-500">
-              Explore Features
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="text-lg px-8 py-6 h-auto">
-              View Crop Predictions
-            </Button>
+            <Link href="#features">
+              <Button
+                size="lg"
+                className="text-lg px-8 py-6 h-auto bg-teal-500 hover:bg-teal-600 cursor-pointer">
+                Explore Features
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+            <Link href={"/about"}>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-lg px-8 py-6 h-auto">
+                More info
+              </Button>
+            </Link>
           </motion.div>
 
           <motion.div

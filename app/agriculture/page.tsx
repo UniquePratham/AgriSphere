@@ -204,10 +204,10 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-3">
-          <div className="p-3 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg">
-            <Wheat className="w-8 h-8 text-white" />
+          <div className="p-3 rounded-lg">
+            <Wheat className="w-8 h-8 text-emerald-500" />
           </div>
-          <h1 className="text-4xl font-bold">Agricultural AI</h1>
+          <h1 className="text-4xl font-bold">Innovating Agriculture with AI</h1>
         </div>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           AI-powered agriculture solutions for sustainable farming and yield

@@ -14,7 +14,9 @@ import {
   X,
   Zap,
   Trees,
+  IndianRupee,
 } from "lucide-react";
+import Image from "next/image";
 
 const tracks = [
   { name: "AI Chat", icon: Brain, href: "/ai", color: "text-teal-600" },
@@ -25,6 +27,12 @@ const tracks = [
     color: "text-emerald-500",
   },
   { name: "Weather", icon: Cloud, href: "/weather", color: "text-green-600" },
+  {
+    name: "Market",
+    icon: IndianRupee,
+    href: "/market-price",
+    color: "text-emerald-600",
+  },
 ];
 
 export function Header() {
@@ -68,7 +76,7 @@ export function Header() {
             whileHover={{ rotate: 180 }}
             transition={{ duration: 0.3 }}
             className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-cyan-500 to-emerald-600 rounded-lg">
-            <Trees className="w-5 h-5 text-white" />
+            <Image src={"/logo.png"} alt="" width={100} height={100} />
           </motion.div>
           <span className="text-xl font-bold bg-gradient-to-r from-cyan-600 to-teal-600 bg-clip-text text-transparent">
             AgriSphere

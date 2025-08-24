@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Send, Brain } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export default function AIChatPage() {
   type Feature = {
@@ -31,12 +32,14 @@ export default function AIChatPage() {
     season: "",
     water_usage: "",
     user_message: "",
+    language: "english",
   });
   const [response, setResponse] = useState<null | {
     message: string;
     type: string;
     sucess: boolean;
   }>(null);
+  const [loading, setLoading] = useState(false);
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -62,6 +65,7 @@ export default function AIChatPage() {
       season: "",
       water_usage: "",
       user_message: feature.example,
+      language: "english",
     });
   };
   const handleDialogClose = () => {
@@ -72,10 +76,11 @@ export default function AIChatPage() {
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!activeFeature) return;
+    setLoading(true);
     const payload: any = {
       user_id: "64f12ab34cd56789ef012345",
       session_id: `session_${activeFeature!.endpoint.replace("/", "")}_001`,
-      user_message: activeFeature!.example,
+      user_message: formData.user_message,
       year: Number(formData.year),
       crop: formData.crop,
       region: {
@@ -95,6 +100,9 @@ export default function AIChatPage() {
       ...(formData.water_usage && {
         water_usage: Number(formData.water_usage),
       }),
+      ...(activeFeature?.endpoint === "/copilot" && {
+        language: formData.language,
+      }),
     };
     try {
       const res = await fetch(
@@ -112,6 +120,8 @@ export default function AIChatPage() {
       setResponse(data);
     } catch (err) {
       setResponse({ error: "Error fetching data" } as any);
+    } finally {
+      setLoading(false);
     }
   };
   // Protect page: redirect to login if not authenticated
@@ -193,30 +203,6 @@ export default function AIChatPage() {
       },
     },
     {
-      name: "Eco-AI",
-      headingColor: "text-rose-700",
-      endpoint: "/eco-ai",
-      description:
-        "Climate Impact Analyzer. Analyze sustainability and climate impact for your farming decisions.",
-      example: "Analyze the sustainability of growing rice here.",
-      color: "bg-rose-100 border-rose-300",
-      payload: {
-        user_id: "64f12ab34cd56789ef012345",
-        session_id: "session_ecoai_001",
-        user_message: "Analyze the sustainability of growing rice here.",
-        year: 2024,
-        crop: "rice",
-        region: { state: "Tamil Nadu", district: "Thanjavur" },
-        soil_quality: 0.78,
-        rainfall: 1300,
-        temperature: 32,
-        ndvi: 0.68,
-        yield: { value: 4000, unit: "kg/ha" },
-        season: "kharif",
-        water_usage: 5000,
-      },
-    },
-    {
       name: "AgriChat",
       headingColor: "text-purple-700",
       endpoint: "/chat",
@@ -248,20 +234,36 @@ export default function AIChatPage() {
   ]);
   const [input, setInput] = useState("");
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim()) {
-      setMessages([...messages, { sender: "user", text: input }]);
+      setMessages((prev) => [...prev, { sender: "user", text: input }]);
       setInput("");
-      // Simulate AI response
-      setTimeout(() => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/gemini/gemini-call`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: input }),
+          }
+        );
+        const data = await res.json();
         setMessages((msgs) => [
           ...msgs,
           {
             sender: "ai",
-            text: "(AI response about agriculture will appear here.)",
+            text: data?.message || "(No response from AI)",
           },
         ]);
-      }, 1200);
+      } catch (err) {
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            sender: "ai",
+            text: "Error: Could not get response from AI.",
+          },
+        ]);
+      }
     }
   };
 
@@ -272,10 +274,10 @@ export default function AIChatPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-4 mb-8">
         <div className="flex items-center justify-center space-x-3">
-          <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg">
-            <Brain className="w-8 h-8 text-white" />
+          <div className="p-3 rounded-lg">
+            <Brain className="w-8 h-8 text-emerald-500" />
           </div>
-          <h1 className="text-4xl font-bold">Agriculture AI Suite</h1>
+          <h1 className="text-4xl font-bold">Innovating Agriculture with AI</h1>
         </div>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Explore smart farming tools powered by AI. Choose a feature below to
@@ -351,6 +353,7 @@ export default function AIChatPage() {
                         <option value="spices">Spices</option>
                         <option value="other">Other</option>
                       </select>
+
                       <input
                         name="region_state"
                         required
@@ -480,10 +483,33 @@ export default function AIChatPage() {
                         placeholder="Question"
                       />
                     </label>
+                    {activeFeature?.endpoint === "/copilot" && (
+                      <>
+                        <label className="block mt-2">Response Language</label>
+                        <select
+                          name="language"
+                          required
+                          value={formData.language}
+                          onChange={handleInputChange}
+                          className="border p-2 rounded w-full">
+                          <option value="english">English</option>
+                          <option value="hindi">Hindi</option>
+                          <option value="bengali">Bengali</option>
+                          <option value="marathi">Marathi</option>
+                          <option value="tamil">Tamil</option>
+                          <option value="telugu">Telugu</option>
+                          <option value="gujarati">Gujarati</option>
+                          <option value="punjabi">Punjabi</option>
+                          <option value="urdu">Urdu</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </>
+                    )}
                     <Button
                       type="submit"
-                      className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 rounded-lg shadow mt-4">
-                      Submit
+                      className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 rounded-lg shadow mt-4"
+                      disabled={loading}>
+                      {loading ? "Loading..." : "Submit"}
                     </Button>
                   </form>
                   {response && (
@@ -521,7 +547,11 @@ export default function AIChatPage() {
                   ? "bg-background text-gray-800"
                   : "bg-green-100 text-green-900"
               }`}>
-              {msg.text}
+              {msg.sender === "ai" ? (
+                <ReactMarkdown>{msg.text}</ReactMarkdown>
+              ) : (
+                msg.text
+              )}
             </div>
           </div>
         ))}
