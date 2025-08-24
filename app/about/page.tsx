@@ -16,7 +16,7 @@ const features = [
   {
     icon: <BarChart3 className="w-8 h-8 text-emerald-600 mb-2" />,
     title: "Crop Yield Prediction",
-    desc: "Enter field data and get AI-powered yield predictions for multiple crops.",
+    desc: "Enter satellite/drone imagery, soil, and weather data and get AI-powered yield predictions for multiple crops.",
   },
   {
     icon: <CloudRain className="w-8 h-8 text-blue-500 mb-2" />,

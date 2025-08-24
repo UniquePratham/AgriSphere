@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Send, Brain } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import jwt from "jsonwebtoken";
 
 export default function AIChatPage() {
   type Feature = {
@@ -15,6 +16,8 @@ export default function AIChatPage() {
     color: string;
     payload: any;
   };
+
+  const [userId, setUserId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeFeature, setActiveFeature] = useState<Feature | null>(null);
   const [formData, setFormData] = useState({
@@ -78,8 +81,8 @@ export default function AIChatPage() {
     if (!activeFeature) return;
     setLoading(true);
     const payload: any = {
-      user_id: "64f12ab34cd56789ef012345",
-      session_id: `session_${activeFeature!.endpoint.replace("/", "")}_001`,
+      user_id: userId,
+      session_id: `session_${userId}`,
       user_message: formData.user_message,
       year: Number(formData.year),
       crop: formData.crop,
@@ -124,10 +127,21 @@ export default function AIChatPage() {
       setLoading(false);
     }
   };
+
   // Protect page: redirect to login if not authenticated
   useEffect(() => {
     if (typeof window !== "undefined" && !localStorage.getItem("accessToken")) {
       window.location.href = "/login";
+    }
+    if (typeof window !== "undefined" && localStorage.getItem("accessToken")) {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        const uid = jwt.decode(token);
+        if (uid && typeof uid === "object" && "username" in uid) {
+          console.log(uid.username);
+          setUserId(uid.username);
+        }
+      }
     }
   }, []);
 
@@ -142,7 +156,7 @@ export default function AIChatPage() {
       example: "क्या इस साल गेहूं उगाना सही रहेगा?",
       color: "bg-green-100 border-green-300",
       payload: {
-        user_id: "64f12ab34cd56789ef012345",
+        user_id: "64f12ab34cd56364569ef012345",
         session_id: "session_copilot_001",
         user_message: "क्या इस साल गेहूं उगाना सही रहेगा?",
         year: 2024,
@@ -165,7 +179,7 @@ export default function AIChatPage() {
       example: "Tell me about the expected rice yield this season.",
       color: "bg-blue-100 border-blue-300",
       payload: {
-        user_id: "64f12ab34cd56789ef012345",
+        user_id: "64f12erter34cd56789ef012345",
         session_id: "session_vision_001",
         user_message: "Tell me about the expected rice yield this season.",
         year: 2024,

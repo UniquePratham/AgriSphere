@@ -7,7 +7,7 @@
 
 ## Features
 
-- 🌾 **Crop Yield Prediction**: Enter field data and get AI-powered yield predictions for multiple crops.
+- 🌾 **Crop Yield Prediction**: Enter satellite/drone imagery, soil, and weather data and get AI-powered yield predictions for multiple crops.
 - 🌦️ **Weather Dashboard**: View past and forecast weather data with interactive charts and horizontal scroll cards.
 - 🧑‍🌾 **AgriCopilot**: Multilingual farming assistant for crop, weather, and farming queries.
 - 📊 **AgriVision**: Explains farming data in a story form, making yield and weather easy for farmers to grasp.
@@ -42,8 +42,8 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/UniquePratham/PolySphere.git
-   cd PolySphere
+   git clone https://github.com/UniquePratham/AgriSphere.git
+   cd AgriSphere
    ```
 2. **Install dependencies:**
    ```bash
